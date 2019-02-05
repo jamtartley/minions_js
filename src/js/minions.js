@@ -6,15 +6,16 @@ export default class MinionController {
         this.minions = [];
 
         for (let i = 0; i < initialMinionCount; i++) {
-            let x = Utils.getRandInt(0, window.innerWidth);
-            let y = Utils.getRandInt(0, window.innerHeight);
+            let x = Utils.getRandInt(-100, 0);
+            let y = Utils.getRandInt(-100, 0);
             this.minions.push(new Minion(new V2(x, y)));
         }
     }
 
-    update(dt, mousePos) {
+    update(dt, mousePos, isMouseDown) {
         for (let m of this.minions) {
-            m.update(dt, mousePos);
+            m.update(dt, mousePos, this.minions);
+            if (isMouseDown) m.repel(dt, mousePos);
         }
     }
 
@@ -30,15 +31,27 @@ class Minion {
         this.position = position;
         this.velocity = new V2(0, 0);
         this.acceleration = new V2(0, 0);
-        this.maxForce = Utils.getRandFloat(0.1, 0.5);
-        this.maxSpeed = Utils.getRandInt(2, 6);
+        this.maxForce = Utils.getRandFloat(16, 32);
+        this.maxSpeed = Utils.getRandInt(8, 12);
+        this.avoidRange = 25;
 
         this.radius = 4;
 
         // Trail
         this.hasTrail = true;
         this.positionHistory = [];
-        this.trailCount = 50;
+        this.trailCount = 10;
+    }
+
+    repel(dt, from) {
+        const repelForce = 1000;
+        let dir = V2.getSub(this.position, from);
+        let mag = repelForce / (dir.getMagnitudeSquared());
+
+        let force = new V2(dir.x * mag, dir.y * mag);
+        force.multiplyScalar(dt);
+
+        this.applyForce(force);
     }
 
     seek(dt, target) {
@@ -47,19 +60,49 @@ class Minion {
         desired.multiplyScalar(this.maxSpeed);
         let steer = V2.getSub(desired, this.velocity);
         steer.limit(this.maxForce);
+        steer.multiplyScalar(dt);
 
         this.applyForce(steer);
     }
 
-    avoid() {
+    avoid(dt, others) {
+        let desDist = this.avoidRange;
+        let sum = new V2(0, 0);
+        let count = 0;
+
+        for (let o of others) {
+            if (o === this) continue;
+
+            let d = V2.getDistance(this.position, o.position);
+
+            if (d > 0 && d < desDist) {
+                let diff = V2.getSub(this.position, o.position);
+                diff.normalise();
+                diff.divideScalar(d);
+                sum.add(diff);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            sum.divideScalar(count);
+            sum.normalise();
+            sum.multiplyScalar(this.maxSpeed);
+            sum.sub(this.velocity);
+            sum.limit(this.maxForce);
+            sum.multiplyScalar(dt);
+
+            this.applyForce(sum);
+        }
     }
 
     applyForce(force) {
         this.acceleration.add(force);
     }
 
-    update(dt, mousePos) {
+    update(dt, mousePos, others) {
         this.seek(dt, mousePos);
+        this.avoid(dt, others);
 
         this.velocity.add(this.acceleration);
         this.velocity.limit(this.maxSpeed);

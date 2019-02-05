@@ -17,6 +17,11 @@ class V2 {
         this.y += other.y
     }
 
+    sub(other) {
+        this.x -= other.x;
+        this.y -= other.y;
+    }
+
     multiply(other) {
         this.x *= other.x;
         this.y *= other.y;
@@ -68,8 +73,12 @@ class V2 {
         return new V2(a.x - b.x, a.y - b.y);
     }
 
-    static getAdditionVector(a, b) {
+    static getAdd(a, b) {
         return new V2(a.x + b.x, a.y + b.y);
+    }
+
+    static getMult(a, b) {
+        return new V2(a.x * b.x, a.y * b.y);
     }
 
     static getDistance(a, b) {
