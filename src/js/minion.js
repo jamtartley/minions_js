@@ -1,3 +1,4 @@
+import * as Utils from "./utils.js";
 import Vector2D from "./vector_2d.js";
 
 export default class MinionController {
@@ -5,13 +6,15 @@ export default class MinionController {
         this.minions = [];
 
         for (let i = 0; i < initialMinionCount; i++) {
-            this.minions.push(new Minion(new Vector2D(500, 500)));
+            let x = Utils.getRandInt(0, window.innerWidth);
+            let y = Utils.getRandInt(0, window.innerHeight);
+            this.minions.push(new Minion(new Vector2D(x, y)));
         }
     }
 
-    update(dt) {
+    update(dt, mousePos) {
         for (let m of this.minions) {
-            m.update(dt);
+            m.update(dt, mousePos);
         }
     }
 
@@ -25,11 +28,26 @@ export default class MinionController {
 class Minion {
     constructor(position) {
         this.position = position;
-        this.velocity = new Vector2D(0.1, 0.02);
+        this.velocity = new Vector2D(0, 0);
     }
 
-    update(dt) {
-        let dv = new Vector2D(this.velocity.x * dt, this.velocity.y * dt);
+    getSeekVel(target) {
+        let seekVel = Vector2D.getSubtractionVector(target, this.position).getNormalisedClone();
+        seekVel.multiplyScalar(0.5);
+        return Vector2D.getSubtractionVector(seekVel, this.velocity);
+    }
+
+    update(dt, mousePos) {
+        let seekVel = this.getSeekVel(mousePos);
+        const maxForce = 0.5;
+
+        seekVel.x = Utils.clamp(seekVel.x, -maxForce, maxForce);
+        seekVel.y = Utils.clamp(seekVel.y, -maxForce, maxForce);
+
+        const maxSpeed = 1;
+        let desiredVel = new Vector2D((this.velocity.x + seekVel.x) * dt, (this.velocity.y + seekVel.y) * dt);
+        let dv = new Vector2D(Utils.clamp(desiredVel.x, -maxSpeed, maxSpeed), Utils.clamp(desiredVel.y, -maxSpeed, maxSpeed));
+
         this.position.add(dv);
     }
 

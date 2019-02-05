@@ -37,6 +37,11 @@ class Vector2D {
         this.y /= scalar;
     }
 
+    getNormalisedClone() {
+        let mag = this.getMagnitude();
+        return new Vector2D(this.x / mag, this.y / mag);
+    }
+
     clone() {
         return new Vector2D(this.x, this.y);
     }

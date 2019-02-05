@@ -1,9 +1,16 @@
 import MinionController from "./minion.js";
+import Vector2D from "./vector_2d.js";
 import * as Utils from "./utils.js";
 
 function init() {
+    canvas.addEventListener("mousemove", mouseMove, false);
     window.requestAnimationFrame(update);
     resize();
+}
+
+function mouseMove(e) {
+    currentMousePos.x = e.x;
+    currentMousePos.y = e.y;
 }
 
 function resize() {
@@ -11,7 +18,7 @@ function resize() {
     canvas.height = window.innerHeight;
 
     if (canvas.width != prevWidth || canvas.height != prevHeight) {
-        minionController = new MinionController(1);
+        minionController = new MinionController(10);
     }
 }
 
@@ -34,7 +41,7 @@ function update() {
 }
 
 function updateCanvas() {
-    if (dt) minionController.update(dt);
+    if (dt) minionController.update(dt, currentMousePos);
 }
 
 function drawCanvas() {
@@ -48,6 +55,7 @@ let prevHeight;
 let dt;
 let previousFrameTime;
 let minionController;
+let currentMousePos = new Vector2D(0, 0);
 
 if (canvas && canvas.getContext) {
     init();
