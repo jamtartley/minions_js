@@ -1,4 +1,4 @@
-class Vector2D {
+class V2 {
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -37,29 +37,43 @@ class Vector2D {
         this.y /= scalar;
     }
 
+    normalise() {
+        let mag = this.getMagnitude();
+        this.divideScalar(mag);
+    }
+
+    limit(lim) {
+        let mag = this.getMagnitude();
+
+        if (mag < lim) return;
+
+        this.normalise();
+        this.multiplyScalar(lim);
+    }
+
     getNormalisedClone() {
         let mag = this.getMagnitude();
-        return new Vector2D(this.x / mag, this.y / mag);
+        return new V2(this.x / mag, this.y / mag);
     }
 
     clone() {
-        return new Vector2D(this.x, this.y);
+        return new V2(this.x, this.y);
     }
 
     getNegatedVector() {
-        return new Vector2D(-this.x, -this.y);
+        return new V2(-this.x, -this.y);
     }
 
-    static getSubtractionVector(a, b) {
-        return new Vector2D(a.x - b.x, a.y - b.y);
+    static getSub(a, b) {
+        return new V2(a.x - b.x, a.y - b.y);
     }
 
     static getAdditionVector(a, b) {
-        return new Vector2D(a.x + b.x, a.y + b.y);
+        return new V2(a.x + b.x, a.y + b.y);
     }
 
     static getDistance(a, b) {
-        return Math.sqrt(Vector2D.getDistanceSquared(a, b));
+        return Math.sqrt(V2.getDistanceSquared(a, b));
     }
 
     static getDistanceSquared(a, b) {
@@ -69,4 +83,4 @@ class Vector2D {
     }
 }
 
-export default Vector2D;
+export default V2;

@@ -27,3 +27,16 @@ export function getRandInt(min, max) {
 export function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
+
+export function lerp(a, b, t) {
+    return (1 - t) * a + t * b;
+}
+
+export function lineBetween(context, a, b, colour, thickness = 1) {
+    context.beginPath();
+    context.moveTo(a.x, a.y);
+    context.lineTo(b.x, b.y);
+    context.strokeStyle = colour;
+    context.lineWidth = thickness;
+    context.stroke();
+}

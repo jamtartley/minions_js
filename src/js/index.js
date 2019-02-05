@@ -1,5 +1,5 @@
-import MinionController from "./minion.js";
-import Vector2D from "./vector_2d.js";
+import MinionController from "./minions.js";
+import V2 from "./v2.js";
 import * as Utils from "./utils.js";
 
 function init() {
@@ -55,7 +55,7 @@ let prevHeight;
 let dt;
 let previousFrameTime;
 let minionController;
-let currentMousePos = new Vector2D(0, 0);
+let currentMousePos = new V2(0, 0);
 
 if (canvas && canvas.getContext) {
     init();
