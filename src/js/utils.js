@@ -32,6 +32,10 @@ export function lerp(a, b, t) {
     return (1 - t) * a + t * b;
 }
 
+export function map(val, min, max, from, to) {
+    return from + (to - from) * ((val - min) / (max - min));
+}
+
 export function lineBetween(context, a, b, colour, thickness = 1) {
     context.beginPath();
     context.moveTo(a.x, a.y);

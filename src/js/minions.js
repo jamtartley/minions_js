@@ -33,7 +33,7 @@ class Minion {
         this.acceleration = new V2(0, 0);
         this.maxForce = Utils.getRandFloat(16, 32);
         this.maxSpeed = Utils.getRandInt(8, 12);
-        this.avoidRange = 25;
+        this.avoidRange = 10;
 
         this.radius = 4;
 
@@ -65,20 +65,39 @@ class Minion {
         this.applyForce(steer);
     }
 
+    arrive(dt, target) {
+        const stopDist = 0;
+        const startSlowdown = 250;
+        let desired = V2.getSub(target, this.position);
+        let mag = desired.getMagnitude();
+        desired.normalise();
+
+        if (mag < startSlowdown) {
+            let m = Utils.map(mag, stopDist, startSlowdown, 0, this.maxSpeed);
+            desired.multiplyScalar(m);
+        } else {
+            desired.multiplyScalar(this.maxSpeed);
+        }
+
+        let steer = V2.getSub(desired, this.velocity);
+        steer.limit(this.maxForce);
+        steer.multiplyScalar(dt);
+
+        this.applyForce(steer);
+    }
+
     avoid(dt, others) {
-        let desDist = this.avoidRange;
         let sum = new V2(0, 0);
         let count = 0;
 
         for (let o of others) {
             if (o === this) continue;
 
-            let d = V2.getDistance(this.position, o.position);
+            let d = V2.getDistanceSquared(this.position, o.position);
 
-            if (d > 0 && d < desDist) {
+            if (d < this.avoidRange * this.avoidRange) {
                 let diff = V2.getSub(this.position, o.position);
                 diff.normalise();
-                diff.divideScalar(d);
                 sum.add(diff);
                 count++;
             }
@@ -103,6 +122,7 @@ class Minion {
     update(dt, mousePos, others) {
         this.seek(dt, mousePos);
         this.avoid(dt, others);
+        //this.arrive(dt, mousePos);
 
         this.velocity.add(this.acceleration);
         this.velocity.limit(this.maxSpeed);
