@@ -44,7 +44,7 @@ class V2 {
 
     normalise() {
         let mag = this.getMagnitude();
-        this.divideScalar(mag);
+        if (mag !== 0) this.divideScalar(mag);
     }
 
     limit(lim) {

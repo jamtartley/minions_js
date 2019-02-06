@@ -6,8 +6,8 @@ export default class MinionController {
         this.minions = [];
 
         for (let i = 0; i < initialMinionCount; i++) {
-            let x = Utils.getRandInt(0, 50);
-            let y = Utils.getRandInt(0, 50);
+            let x = Utils.getRandInt(0, window.innerWidth);
+            let y = Utils.getRandInt(0, window.innerHeight);
             this.minions.push(new Minion(new V2(x, y)));
         }
     }
@@ -31,10 +31,11 @@ class Minion {
         this.velocity = new V2(0, 0);
         this.acceleration = new V2(0, 0);
         this.maxForce = Utils.getRandFloat(16, 32);
-        this.maxSpeed = Utils.getRandInt(8, 12);
+        this.maxSpeed = Utils.getRandInt(2, 16);
 
         this.radius = 4;
         this.avoidRange = this.radius * 2;
+        this.flockRange = 200 * 200;
 
         // Trail
         this.hasTrail = true;
@@ -47,21 +48,22 @@ class Minion {
         let dir = V2.getSub(this.position, from);
         let mag = repelForce / (dir.getMagnitudeSquared());
 
-        let force = new V2(dir.x * mag, dir.y * mag);
-        force.multiplyScalar(dt);
+        dir.multiplyScalar(mag);
+        dir.multiplyScalar(dt);
 
-        return force;
+        return dir;
     }
 
     seek(dt, target) {
         let desired = V2.getSub(target, this.position);
+
         desired.normalise();
         desired.multiplyScalar(this.maxSpeed);
-        let steer = V2.getSub(desired, this.velocity);
-        steer.limit(this.maxForce);
-        steer.multiplyScalar(dt);
+        desired.sub(this.velocity);
+        desired.limit(this.maxForce);
+        desired.multiplyScalar(dt);
 
-        return steer;
+        return desired;
     }
 
     arrive(dt, target) {
@@ -78,11 +80,11 @@ class Minion {
             desired.multiplyScalar(this.maxSpeed);
         }
 
-        let steer = V2.getSub(desired, this.velocity);
-        steer.limit(this.maxForce);
-        steer.multiplyScalar(dt);
+        desired.sub(this.velocity);
+        desired.limit(this.maxForce);
+        desired.multiplyScalar(dt);
 
-        return steer;
+        return desired;
     }
 
     avoid(dt, others) {
@@ -135,20 +137,89 @@ class Minion {
         }
     }
 
+    align(dt, others) {
+        let sum = new V2(0,0);
+        let count = 0;
+
+        for (let o of others) {
+            if (o === this) continue;
+
+            if (V2.getDistanceSquared(this.position, o.position) < this.flockRange) {
+                sum.add(o.velocity);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            sum.divideScalar(count);
+            sum.normalise();
+            sum.multiplyScalar(this.maxSpeed);
+
+            let steer = V2.getSub(sum, this.velocity);
+            sum.sub(this.velocity);
+            sum.limit(this.maxForce);
+            sum.multiplyScalar(dt);
+        }
+
+        return sum;
+    }
+
+    cohesion(dt, others) {
+        let sum = new V2(0, 0);
+        let count = 0;
+
+        for (let o of others) {
+            if (o === this) continue;
+
+            if (V2.getDistanceSquared(this.position, o.position) < this.flockRange) {
+                sum.add(o.position);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            sum.divideScalar(count);
+            return this.seek(dt, sum);
+        }
+
+        return sum;
+    }
+
+    flock(dt, others) {
+        let avoid = this.avoid(dt, others);
+        let align = this.align(dt, others);
+        let cohesion = this.cohesion(dt, others);
+
+        avoid.multiplyScalar(1.5);
+        align.multiplyScalar(1);
+        cohesion.multiplyScalar(1);
+
+        avoid.add(align);
+        avoid.add(cohesion);
+
+        return avoid;
+    }
+
     runBehaviours(dt, mousePos, isMouseDown, others) {
         let seekForce = this.seek(dt, mousePos);
+        //let arriveForce = this.arrive(dt, mousePos);
         let avoidForce = this.avoid(dt, others);
         let repelForce = new V2(0, 0);
+        let flockForce = this.flock(dt, others);
 
         if (isMouseDown) repelForce = this.repel(dt, mousePos);
 
         seekForce.multiplyScalar(1);
-        avoidForce.multiplyScalar(2);
-        repelForce.multiplyScalar(1);
+        //arriveForce.multiplyScalar(2);
+        avoidForce.multiplyScalar(1);
+        repelForce.multiplyScalar(2);
+        flockForce.multiplyScalar(1.5);
 
         this.applyForce(seekForce);
+        //this.applyForce(arriveForce);
         this.applyForce(avoidForce);
         this.applyForce(repelForce);
+        this.applyForce(flockForce);
     }
 
     update(dt, mousePos, isMouseDown, others) {
