@@ -44,7 +44,7 @@ class Minion {
     }
 
     repel(dt, from) {
-        const repelForce = 1000;
+        const repelForce = 1500;
         let dir = V2.getSub(this.position, from);
         let mag = repelForce / (dir.getMagnitudeSquared());
 

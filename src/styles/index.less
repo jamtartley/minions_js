@@ -1,3 +1,5 @@
+@import "./sizes.less";
+
 * {
     text-align: left;
 }
@@ -8,4 +10,20 @@ html, body {
     padding: 0;
     user-select: none;
     overflow: hidden;
+}
+
+#main-container {
+    display: flex;
+}
+
+#control-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20%;
+    height: 60%;
+    margin: @size-medium;
+    padding: @size-small;
+    background: rgba(0, 0, 0, .25);
+    color: white;
 }
