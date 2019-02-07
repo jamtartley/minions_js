@@ -47,6 +47,11 @@ class V2 {
         if (mag !== 0) this.divideScalar(mag);
     }
 
+    setMag(mag) {
+        this.normalise();
+        this.multiplyScalar(mag);
+    }
+
     limit(lim) {
         let mag = this.getMagnitude();
 

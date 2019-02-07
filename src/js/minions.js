@@ -1,9 +1,13 @@
 import * as Utils from "./utils.js";
+import QuadTree from "./quadtree.js";
+import Rect from "./rect.js";
 import V2 from "./v2.js";
 
 export default class MinionController {
     constructor(initialMinionCount) {
         this.minions = [];
+        this.bounds = new Rect(new V2(window.innerWidth / 2, window.innerHeight / 2), window.innerWidth, window.innerHeight);
+        this.quadtree = new QuadTree(this.bounds);
 
         for (let i = 0; i < initialMinionCount; i++) {
             let x = Utils.getRandInt(0, window.innerWidth);
@@ -13,12 +17,17 @@ export default class MinionController {
     }
 
     update(dt, mousePos, isMouseDown) {
+        this.quadtree.clear();
+
         for (let m of this.minions) {
             m.update(dt, mousePos, isMouseDown, this.minions);
+            this.quadtree.insert(m);
         }
     }
 
     draw(context) {
+        this.quadtree.draw(context);
+
         for (let m of this.minions) {
             m.draw(context);
         }
@@ -115,6 +124,71 @@ class Minion {
         }
 
         return sum;
+    }
+
+    align(dt, others) {
+        const affectDist = 100;
+        let sum = new V2(0, 0);
+        let count = 0;
+
+        for (let o of others) {
+            if (o === this) continue;
+
+            if (V2.getDistanceSquared(this.position, o.position) < affectDist * affectDist) {
+                sum.add(o.velocity);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            sum.divideScalar(others.length);
+            sum.setMag(this.maxSpeed);
+
+            let steer = V2.getSub(sum, this.velocity);
+            steer.limit(this.maxForce);
+            steer.multiplyScalar(dt);
+
+            return steer;
+        } else {
+            return new V2(0, 0);
+        }
+    }
+
+    cohesion(dt, others) {
+        const affectDist = 100;
+        let sum = new V2(0, 0);
+        let count = 0;
+
+        for (let o of others) {
+            if (o === this) continue;
+
+            if (V2.getDistanceSquared(this.position, o.position) < affectDist * affectDist) {
+                sum.add(o.position);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            sum.divideScalar(count);
+            return this.seek(dt, sum);
+        } else {
+            return new V2(0, 0);
+        }
+    }
+
+    flock(dt, others) {
+        let avoid = this.avoid(dt, others);
+        let align = this.align(dt, others);
+        let cohesion = this.cohesion(dt, others);
+
+        avoid.multiplyScalar(1.5);
+        align.multiplyScalar(1);
+        cohesion.multiplyScalar(1);
+
+        avoid.add(align);
+        avoid.add(cohesion);
+
+        return avoid;
     }
 
     applyForce(force) {
