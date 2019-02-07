@@ -65,7 +65,7 @@ let prevHeight;
 let dt;
 let previousFrameTime;
 let minionController;
-let mousePos = new V2(0, 0);
+let mousePos = new V2(window.innerWidth / 2, window.innerHeight / 2);
 let isMouseDown = false;
 
 if (canvas && canvas.getContext) {

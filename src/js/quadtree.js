@@ -2,7 +2,8 @@ import Rect from "./rect.js";
 import V2 from "./v2.js";
 import * as Utils from "./utils.js";
 
-const CAPACITY = 4;
+const CAPACITY = 8;
+const LINE_COLOUR = "#183547";
 
 export default class QuadTree {
     constructor(bounds) {
@@ -17,7 +18,7 @@ export default class QuadTree {
 
     insert(child) {
         if (this.bounds.contains(child.position) === false) return false;
-        if (this.children.length < CAPACITY && this.northWest === null) {
+        if (this.children.length <= CAPACITY && this.northWest === null) {
             this.children.push(child);
             return true;
         }
@@ -33,13 +34,15 @@ export default class QuadTree {
     }
 
     subdivide() {
-        let quarterWidth = this.bounds.halfWidth / 2;
-        let quarterHeight = this.bounds.halfHeight / 2;
+        let x = this.bounds.origin.x;
+        let y = this.bounds.origin.y;
+        let w = this.bounds.w / 2;
+        let h = this.bounds.h / 2;
 
-        let nwRect = new Rect(new V2(this.bounds.left + quarterWidth, this.bounds.top + quarterHeight), this.bounds.halfWidth, this.bounds.halfHeight);
-        let neRect = new Rect(new V2(this.bounds.right + quarterWidth, this.bounds.top + quarterHeight), this.bounds.halfWidth, this.bounds.halfHeight);
-        let swRect = new Rect(new V2(this.bounds.left + quarterWidth, this.bounds.bottom - quarterHeight), this.bounds.halfWidth, this.bounds.halfHeight);
-        let seRect = new Rect(new V2(this.bounds.right - quarterWidth, this.bounds.bottom - quarterHeight), this.bounds.halfWidth, this.bounds.halfHeight);
+        let nwRect = new Rect(new V2(x, y), w, h);
+        let neRect = new Rect(new V2(x + w, y), w, h);
+        let swRect = new Rect(new V2(x + w, y + h), w, h);
+        let seRect = new Rect(new V2(x, y + h), w, h);
 
         this.northWest = new QuadTree(nwRect);
         this.northEast = new QuadTree(neRect);
@@ -56,31 +59,30 @@ export default class QuadTree {
         this.children.length = 0;
     }
 
-    getInBounds(bounds) {
-        let hits = [];
+    getInBounds(rect, hitsSoFar) {
+        if (!hitsSoFar) hitsSoFar = [];
+        if (rect.intersects(this.bounds) === false) return hitsSoFar;
 
-        if (this.bounds.intersects(bounds) === false) return hits;
-
-        for (let i = 0; i < this.children.length; i++) {
-            let child = this.children[i];
-            if (bounds.contains(child.position)) hits.push(child);
+        for (let c of this.children) {
+            if (rect.contains(c.position)) hitsSoFar.push(c);
         }
 
-        if (this.northWest === null) return hits;
+        if (this.northWest !== null) {
+            this.northWest.getInBounds(rect, hitsSoFar);
+            this.northEast.getInBounds(rect, hitsSoFar);
+            this.southWest.getInBounds(rect, hitsSoFar);
+            this.southEast.getInBounds(rect, hitsSoFar);
+        }
 
-        hits.concat(this.northWest.getInBounds(bounds));
-        hits.concat(this.northEast.getInBounds(bounds));
-        hits.concat(this.southWest.getInBounds(bounds));
-        hits.concat(this.southWest.getInBounds(bounds));
-
-        return hits;
+        return hitsSoFar;
     }
 
     draw(context) {
-        Utils.lineBetween(context, new V2(this.bounds.left, this.bounds.top), new V2(this.bounds.right, this.bounds.top), "white", 1);
-        Utils.lineBetween(context, new V2(this.bounds.right, this.bounds.top), new V2(this.bounds.right, this.bounds.bottom), "white", 1);
-        Utils.lineBetween(context, new V2(this.bounds.right, this.bounds.bottom), new V2(this.bounds.left, this.bounds.bottom), "white", 1);
-        Utils.lineBetween(context, new V2(this.bounds.left, this.bounds.bottom), new V2(this.bounds.left, this.bounds.top), "white", 1);
+        const thickness = 8;
+        Utils.lineBetween(context, new V2(this.bounds.origin.x, this.bounds.origin.y), new V2(this.bounds.origin.x + this.bounds.w, this.bounds.origin.y), LINE_COLOUR, thickness);
+        Utils.lineBetween(context, new V2(this.bounds.origin.x + this.bounds.width, this.bounds.origin.y), new V2(this.bounds.origin.x + this.bounds.w, this.bounds.origin.y + this.bounds.h), LINE_COLOUR, thickness);
+        Utils.lineBetween(context, new V2(this.bounds.origin.x + this.bounds.w, this.bounds.origin.y + this.bounds.h), new V2(this.bounds.origin.x, this.bounds.origin.y + this.bounds.h), LINE_COLOUR, thickness);
+        Utils.lineBetween(context, new V2(this.bounds.origin.x, this.bounds.origin.y + this.bounds.h), new V2(this.bounds.origin.x, this.bounds.origin.y), LINE_COLOUR, thickness);
 
         if (this.northWest !== null) this.northWest.draw(context);
         if (this.northEast !== null) this.northEast.draw(context);

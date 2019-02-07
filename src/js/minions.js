@@ -6,8 +6,7 @@ import V2 from "./v2.js";
 export default class MinionController {
     constructor(initialMinionCount) {
         this.minions = [];
-        this.bounds = new Rect(new V2(window.innerWidth / 2, window.innerHeight / 2), window.innerWidth, window.innerHeight);
-        this.quadtree = new QuadTree(this.bounds);
+        this.quadtree = new QuadTree(new Rect(new V2(0, 0), window.innerWidth, window.innerHeight));
 
         for (let i = 0; i < initialMinionCount; i++) {
             let x = Utils.getRandInt(0, window.innerWidth);
@@ -20,7 +19,7 @@ export default class MinionController {
         this.quadtree.clear();
 
         for (let m of this.minions) {
-            m.update(dt, mousePos, isMouseDown, this.minions);
+            m.update(dt, mousePos, isMouseDown, this.quadtree);
             this.quadtree.insert(m);
         }
     }
@@ -39,21 +38,21 @@ class Minion {
         this.position = position;
         this.velocity = new V2(0, 0);
         this.acceleration = new V2(0, 0);
-        this.maxForce = Utils.getRandFloat(16, 32);
-        this.maxSpeed = Utils.getRandInt(2, 16);
+        this.maxForce = Utils.getRandFloat(8, 16);
+        this.maxSpeed = Utils.getRandInt(2, 8);
 
         this.radius = 4;
-        this.avoidRange = this.radius * 2;
-        this.flockRange = 200 * 200;
+        this.avoidRange = 20;
+        this.flockRange = 200;
 
         // Trail
         this.hasTrail = true;
         this.positionHistory = [];
-        this.trailCount = 10;
+        this.trailCount = 7;
     }
 
     repel(dt, from) {
-        const repelForce = 1500;
+        const repelForce = 1000;
         let dir = V2.getSub(this.position, from);
         let mag = repelForce / (dir.getMagnitudeSquared());
 
@@ -96,22 +95,20 @@ class Minion {
         return desired;
     }
 
-    avoid(dt, others) {
+    avoid(dt, quadtree) {
+        let rect = new Rect(new V2(this.position.x - this.avoidRange / 2, this.position.y - this.avoidRange / 2), this.avoidRange, this.avoidRange);
+        let others = quadtree.getInBounds(rect);
         let sum = new V2(0, 0);
         let count = 0;
 
         for (let o of others) {
             if (o === this) continue;
 
-            let d = V2.getDistanceSquared(this.position, o.position);
-
-            if (d < this.avoidRange * this.avoidRange) {
-                let diff = V2.getSub(this.position, o.position);
-                diff.normalise();
-                diff.divideScalar(d);
-                sum.add(diff);
-                count++;
-            }
+            let diff = V2.getSub(this.position, o.position);
+            diff.normalise();
+            diff.divideScalar(V2.getDistance(this.position, o.position));
+            sum.add(diff);
+            count++;
         }
 
         if (count > 0) {
@@ -126,60 +123,58 @@ class Minion {
         return sum;
     }
 
-    align(dt, others) {
-        const affectDist = 100;
-        let sum = new V2(0, 0);
+    align(dt, quadtree) {
+        let rect = new Rect(new V2(this.position.x - this.flockRange / 2, this.position.y - this.flockRange / 2), this.flockRange, this.flockRange);
+        let others = quadtree.getInBounds(rect);
+        let sum = new V2(0,0);
         let count = 0;
 
         for (let o of others) {
             if (o === this) continue;
 
-            if (V2.getDistanceSquared(this.position, o.position) < affectDist * affectDist) {
-                sum.add(o.velocity);
-                count++;
-            }
+            sum.add(o.velocity);
+            count++;
         }
 
         if (count > 0) {
-            sum.divideScalar(others.length);
-            sum.setMag(this.maxSpeed);
+            sum.divideScalar(count);
+            sum.normalise();
+            sum.multiplyScalar(this.maxSpeed);
 
             let steer = V2.getSub(sum, this.velocity);
-            steer.limit(this.maxForce);
-            steer.multiplyScalar(dt);
-
-            return steer;
-        } else {
-            return new V2(0, 0);
+            sum.sub(this.velocity);
+            sum.limit(this.maxForce);
+            sum.multiplyScalar(dt);
         }
+
+        return sum;
     }
 
-    cohesion(dt, others) {
-        const affectDist = 100;
+    cohesion(dt, quadtree) {
+        let rect = new Rect(new V2(this.position.x - this.flockRange / 2, this.position.y - this.flockRange / 2), this.flockRange, this.flockRange);
+        let others = quadtree.getInBounds(rect);
         let sum = new V2(0, 0);
         let count = 0;
 
         for (let o of others) {
             if (o === this) continue;
 
-            if (V2.getDistanceSquared(this.position, o.position) < affectDist * affectDist) {
-                sum.add(o.position);
-                count++;
-            }
+            sum.add(o.position);
+            count++;
         }
 
         if (count > 0) {
             sum.divideScalar(count);
             return this.seek(dt, sum);
-        } else {
-            return new V2(0, 0);
         }
+
+        return sum;
     }
 
-    flock(dt, others) {
-        let avoid = this.avoid(dt, others);
-        let align = this.align(dt, others);
-        let cohesion = this.cohesion(dt, others);
+    flock(dt, quadtree) {
+        let avoid = this.avoid(dt, quadtree);
+        let align = this.align(dt, quadtree);
+        let cohesion = this.cohesion(dt, quadtree);
 
         avoid.multiplyScalar(1.5);
         align.multiplyScalar(1);
@@ -211,93 +206,24 @@ class Minion {
         }
     }
 
-    align(dt, others) {
-        let sum = new V2(0,0);
-        let count = 0;
-
-        for (let o of others) {
-            if (o === this) continue;
-
-            if (V2.getDistanceSquared(this.position, o.position) < this.flockRange) {
-                sum.add(o.velocity);
-                count++;
-            }
-        }
-
-        if (count > 0) {
-            sum.divideScalar(count);
-            sum.normalise();
-            sum.multiplyScalar(this.maxSpeed);
-
-            let steer = V2.getSub(sum, this.velocity);
-            sum.sub(this.velocity);
-            sum.limit(this.maxForce);
-            sum.multiplyScalar(dt);
-        }
-
-        return sum;
-    }
-
-    cohesion(dt, others) {
-        let sum = new V2(0, 0);
-        let count = 0;
-
-        for (let o of others) {
-            if (o === this) continue;
-
-            if (V2.getDistanceSquared(this.position, o.position) < this.flockRange) {
-                sum.add(o.position);
-                count++;
-            }
-        }
-
-        if (count > 0) {
-            sum.divideScalar(count);
-            return this.seek(dt, sum);
-        }
-
-        return sum;
-    }
-
-    flock(dt, others) {
-        let avoid = this.avoid(dt, others);
-        let align = this.align(dt, others);
-        let cohesion = this.cohesion(dt, others);
-
-        avoid.multiplyScalar(1.5);
-        align.multiplyScalar(1);
-        cohesion.multiplyScalar(1);
-
-        avoid.add(align);
-        avoid.add(cohesion);
-
-        return avoid;
-    }
-
-    runBehaviours(dt, mousePos, isMouseDown, others) {
+    runBehaviours(dt, mousePos, isMouseDown, quadtree) {
         let seekForce = this.seek(dt, mousePos);
-        //let arriveForce = this.arrive(dt, mousePos);
-        let avoidForce = this.avoid(dt, others);
         let repelForce = new V2(0, 0);
-        let flockForce = this.flock(dt, others);
+        let flockForce = this.flock(dt, quadtree);
 
         if (isMouseDown) repelForce = this.repel(dt, mousePos);
 
         seekForce.multiplyScalar(1);
-        //arriveForce.multiplyScalar(2);
-        avoidForce.multiplyScalar(1);
         repelForce.multiplyScalar(2);
         flockForce.multiplyScalar(1.5);
 
         this.applyForce(seekForce);
-        //this.applyForce(arriveForce);
-        this.applyForce(avoidForce);
         this.applyForce(repelForce);
         this.applyForce(flockForce);
     }
 
-    update(dt, mousePos, isMouseDown, others) {
-        this.runBehaviours(dt, mousePos, isMouseDown, others);
+    update(dt, mousePos, isMouseDown, quadtree) {
+        this.runBehaviours(dt, mousePos, isMouseDown, quadtree);
 
         this.velocity.add(this.acceleration);
         this.velocity.limit(this.maxSpeed);
@@ -315,7 +241,7 @@ class Minion {
     draw(context) {
         context.beginPath();
         context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI, false);
-        context.fillStyle = "rgb(150, 150, 150)";
+        context.fillStyle = "rgb(200, 200, 200)";
         context.fill();
 
         if (this.hasTrail) {
@@ -330,7 +256,7 @@ class Minion {
                 let prog = i / this.trailCount;
                 let alpha = Utils.lerp(minAlpha, maxAlpha, prog);
                 let thickness = Utils.lerp(minThick, maxThick, prog);
-                let colour = "rgba(100, 100, 100, " + alpha + ")";
+                let colour = "rgba(200, 200, 200, " + alpha + ")";
 
                 Utils.lineBetween(context, a, b, colour, thickness);
             }
