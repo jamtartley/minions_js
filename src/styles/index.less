@@ -1,17 +1,77 @@
 @import "./sizes.less";
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+@background: rgb(21, 48, 66);
+@foreground: rgb(220, 220, 220);
 
 * {
     text-align: left;
 }
 
 html, body {
-    background: #153042;
+    background: @background;
     margin: 0;
     padding: 0;
     user-select: none;
     overflow: hidden;
+    font-family: 'Lato', sans-serif;
+    color: @foreground;
+}
+
+h1 {
+    font-size: 2em;
+}
+
+p {
+    font-size: 0.85em;
+}
+
+a {
+    font-size: 0.85em;
+    pointer-events: all;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    text-decoration: underline;
+}
+
+hr {
+    border: @size-border solid @background;
+    margin: @size-small 0;
+}
+
+sup {
+    font-size: 0.6em;
 }
 
 #main-container {
     display: flex;
+}
+
+#main-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    margin: @size-medium;
+    background: rgba(0, 0, 0, 0.2);
+
+    @media screen and (min-width: 0px) and (max-width: 720px) {
+        display: none;
+    }
+}
+
+#title {
+    background: rgba(0, 0, 0, 0.3);
+    padding: @size-medium;
+}
+
+#description-panel {
+    padding: @size-medium;
+}
+
+.keyword {
+    color: #EACFBD;
+    font-style: italic;
+    font-size: 1em;
 }
