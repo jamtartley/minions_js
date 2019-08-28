@@ -20,5 +20,8 @@ deploy:
   bucket: minions-jamtartley-com
   local-dir: dist
   acl: public_read
+  region: eu-west-2
+  skip_cleanup: true
   on:
     repo: jamtartley/minions_js
+    branch: master
