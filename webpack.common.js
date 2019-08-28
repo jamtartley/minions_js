@@ -9,12 +9,6 @@ module.exports = {
         filename: "bundle.js",
         path: path.resolve(__dirname, "dist")
     },
-    devServer: {
-        contentBase: path.join(__dirname, "dist"),
-        compress: true,
-        stats: "errors-only",
-        open: true
-    },
     module: {
         rules: [
             {
@@ -38,7 +32,7 @@ module.exports = {
                 }]
             },
             {
-                test: /\.(eot|png|jp(e*)g|svg|ttf|woff|woff2)$/,
+                test: /\.(eot|png|jp(e*)g|svg|ttf|otf|woff|woff2)$/,
                 use: [{
                     loader: 'file-loader',
                     options: {
@@ -49,5 +43,4 @@ module.exports = {
             },
         ]
     },
-    watch: true
 };

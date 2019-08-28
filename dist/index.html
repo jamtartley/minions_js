@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Autonomous minion simulation</title>
+        <title>Boids simulation</title>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/2.9.7/jquery.fullpage.js"></script>
@@ -15,15 +15,15 @@
                     <h1>minions_js</h1>
                 </div>
                 <div id="description-panel">
-                    <p>This is a small <span class="keyword">autonomous agent simulation</span>, intended to show how <span class="keyword">emergent behaviours</span> can observed when discrete entities follow simple rules.</p>
+                    <p>This is a small <span class="keyword">boid simulation</span>, intended to show how <span class="keyword">emergent behaviours</span> can occur when autonomous agents are given a simple ruleset.</p>
                     <hr/>
                     <p>Minions will try to gather around their leader - the mouse pointer.</p>
                     <hr/>
-                    <p>Left click to shout at them and scare them away<sup><span class="keyword"> you monster</span></sup></p>
+                    <p>Left click to scare them away<sup><span class="keyword"> you monster</span></sup></p>
                     <hr/>
                     <p>You will see that minions will try to form little packs with others to feel safe.</p>
                     <hr/>
-                    <p>The background is a visualisation of the <span class="keyword">quadtree spatial partitioning</span> algorithm I implemented for collision detection and I thought it looked nice so I left it in.</p>
+                    <p>The background is a visualisation of the <span class="keyword">quadtree spatial partitioning</span> algorithm used to bucket the minions for efficient collision detection.</p>
                     <hr/>
                     <a href="https://gitub.com/jamtartley/minions_js">Source code</a>
                 </div>

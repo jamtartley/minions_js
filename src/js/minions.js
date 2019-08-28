@@ -45,10 +45,15 @@ class Minion {
         this.avoidRange = 20;
         this.flockRange = 200;
 
-        // Trail
-        this.hasTrail = true;
+        this.trailCount = 5;
         this.positionHistory = [];
-        this.trailCount = 7;
+
+        const min = 190;
+        const max = 210;
+        let r = Utils.getRandInt(min, max);
+        let g = Utils.getRandInt(min, max);
+        let b = Utils.getRandInt(min, max);
+        this.colour = "rgb(" + r + ", " + g + ", " + b + ")";
     }
 
     repel(dt, from) {
@@ -232,7 +237,7 @@ class Minion {
 
         this.lockIntoWindow();
 
-        if (this.hasTrail) {
+        if (this.trailCount > 0) {
             this.positionHistory.push(this.position.clone());
             if (this.positionHistory.length >= this.trailCount) this.positionHistory.shift();
         }
@@ -241,24 +246,21 @@ class Minion {
     draw(context) {
         context.beginPath();
         context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI, false);
-        context.fillStyle = "rgb(200, 200, 200)";
+        context.fillStyle = this.colour;
         context.fill();
 
-        if (this.hasTrail) {
+        if (this.trailCount > 0) {
             for (let i = 0; i < this.positionHistory.length - 1; i++) {
                 const minAlpha = 0;
                 const maxAlpha = 0.8;
                 const minThick = 1;
-                const maxThick = this.radius * 2;
+                const maxThick = this.radius * 3;
 
                 let a = this.positionHistory[i];
                 let b = this.positionHistory[i + 1];
-                let prog = i / this.trailCount;
-                let alpha = Utils.lerp(minAlpha, maxAlpha, prog);
-                let thickness = Utils.lerp(minThick, maxThick, prog);
-                let colour = "rgba(200, 200, 200, " + alpha + ")";
+                let thickness = Utils.lerp(minThick, maxThick, i / this.trailCount);
 
-                Utils.lineBetween(context, a, b, colour, thickness);
+                Utils.lineBetween(context, a, b, this.colour, thickness);
             }
         }
     }
