@@ -1,4 +1,4 @@
-@size-border: 1px;
+@size-border: 2px;
 @size-xsmall: 4px;
 @size-small: 8px;
 @size-medium: 16px;
@@ -9,9 +9,12 @@
 
 @background: rgb(21, 48, 66);
 @foreground: rgb(220, 220, 220);
+@accent: #C78B2A;
+@shadow-light: rgba(0, 0, 0, 0.2);
 
 * {
     text-align: left;
+    text-transform: lowercase;
 }
 
 html, body {
@@ -25,7 +28,8 @@ html, body {
 }
 
 h1 {
-    font-size: 2em;
+    font-size: 3em;
+    text-shadow: @size-xsmall @size-xsmall @shadow-light;
 }
 
 p {
@@ -33,7 +37,7 @@ p {
 }
 
 a {
-    font-size: 0.85em;
+    font-size: 1.5em;
     pointer-events: all;
     cursor: pointer;
     text-decoration: none;
@@ -47,7 +51,7 @@ hr {
 }
 
 sup {
-    font-size: 0.6em;
+    font-size: 0.8em;
 }
 
 #main-container {
@@ -58,7 +62,7 @@ sup {
     position: absolute;
     top: 0;
     left: 0;
-    width: 25%;
+    width: 30%;
     margin: @size-medium;
     background: rgba(0, 0, 0, 0.2);
 
@@ -68,7 +72,6 @@ sup {
 }
 
 #title {
-    background: rgba(0, 0, 0, 0.3);
     padding: @size-medium;
 }
 
@@ -77,7 +80,7 @@ sup {
 }
 
 .keyword {
-    color: #EACFBD;
+    color: @accent;
     font-style: italic;
-    font-size: 1em;
+    font-size: 1.3em;
 }

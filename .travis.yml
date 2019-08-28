@@ -8,6 +8,13 @@ cache:
   - node_modules
 notifications:
   email: false
+  irc:
+    use_notice: true
+    skip_join: false
+    on_success: always
+    on_failure: always
+    channels:
+      secure: rTrKHjyK1C28ApTukFzEmNS0tfhO5eH4R1UyDfuxjkEt1b1sVThntK3QrNcinvOEvN37uUhFj8OVUH5zj5EwFEgD6QCq9AJ5vWLDeNGBPcEqCZvr6hLNYvjsKKdJ4TK3wPJoVZS0RkR5XtFPaJ3iaGJu4kzFeiTT8VJtSLc1Zv+jJ1yhLcQJQ91YpDKAD9ILjlABbNTcA8NV8y3zX2dSuCoqBE5F3xXSpsqOpW2rpB3zrc52XybCmD9HAQGCkw4wx0k2HKbnsV/6UCe55qrEULASYNtJgy23fUGXA55rrgmKq94TcbLWCm/nDdXSULXQb12hDQOM6wd8qKQWa7BFi0vYd6N2sMfVGvR7325NBMNl+PBb9g3HyF83GOpknV+4K32uv8DaUUno+Hf9P2o++JQj3RiCPYeSpTkNxp9VZoQCNoDxGJF21jYH8/xu+7snhBxMzQgiqqowICaOKNPP9gKxe3Nv17Sr6zGhjOiSAol8hLcLCPcCUcAsARxizftghcwreZOMzeUEl5S/Mhixz8HML++TThhQn0/s/M7xlUw+zdbZnJbdwm51jZeZXSvYm2eupWK2WI1C9TUCNndqK5cvPgdFzhSTv6JaMoBg/z+v/ScTFEVOwFQKWAVNYZoSuPOsjxiAMB31DaUIa0191bemp5P/WeZCoS9pVn/fOew=
 git:
   depth: false
 before_deploy:

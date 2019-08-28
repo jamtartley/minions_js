@@ -28,7 +28,7 @@ function resize() {
     canvas.height = window.innerHeight;
 
     if (canvas.width != prevWidth || canvas.height != prevHeight) {
-        minionController = new MinionController(100);
+        minionController = new MinionController(150);
     }
 }
 

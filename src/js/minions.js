@@ -39,17 +39,17 @@ class Minion {
         this.velocity = new V2(0, 0);
         this.acceleration = new V2(0, 0);
         this.maxForce = Utils.getRandFloat(8, 16);
-        this.maxSpeed = Utils.getRandInt(2, 8);
+        this.maxSpeed = Utils.getRandInt(4, 8);
 
-        this.radius = 4;
-        this.avoidRange = 20;
+        this.radius = 3;
+        this.avoidRange = 25;
         this.flockRange = 200;
 
-        this.trailCount = 5;
+        this.trailCount = 4;
         this.positionHistory = [];
 
-        const min = 190;
-        const max = 210;
+        const min = 225;
+        const max = 255;
         let r = Utils.getRandInt(min, max);
         let g = Utils.getRandInt(min, max);
         let b = Utils.getRandInt(min, max);
@@ -181,7 +181,7 @@ class Minion {
         let align = this.align(dt, quadtree);
         let cohesion = this.cohesion(dt, quadtree);
 
-        avoid.multiplyScalar(1.5);
+        avoid.multiplyScalar(2);
         align.multiplyScalar(1);
         cohesion.multiplyScalar(1);
 
@@ -219,7 +219,7 @@ class Minion {
         if (isMouseDown) repelForce = this.repel(dt, mousePos);
 
         seekForce.multiplyScalar(1);
-        repelForce.multiplyScalar(2);
+        repelForce.multiplyScalar(5);
         flockForce.multiplyScalar(1.5);
 
         this.applyForce(seekForce);
