@@ -11,6 +11,7 @@
 @foreground: rgb(220, 220, 220);
 @accent: #C78B2A;
 @shadow-light: rgba(0, 0, 0, 0.2);
+@panel-back: rgba(0, 0, 0, 0.5);
 
 * {
     text-align: left;
@@ -64,7 +65,7 @@ sup {
     left: 0;
     width: 30%;
     margin: @size-medium;
-    background: rgba(0, 0, 0, 0.2);
+    background: @panel-back;
 
     @media screen and (min-width: 0px) and (max-width: 720px) {
         display: none;

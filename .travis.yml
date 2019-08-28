@@ -13,6 +13,13 @@ notifications:
     skip_join: false
     on_success: always
     on_failure: always
+    template:
+    - "%{author} pushed to the repo %{repository_slug} on the %{branch} branch. %{message}"
+    - "======================="
+    - "%{commit_message}"
+    - "======================="
+    - 'Code diff: %{compare_url}'
+    - 'Travis build log: %{build_url}'
     channels:
       secure: rTrKHjyK1C28ApTukFzEmNS0tfhO5eH4R1UyDfuxjkEt1b1sVThntK3QrNcinvOEvN37uUhFj8OVUH5zj5EwFEgD6QCq9AJ5vWLDeNGBPcEqCZvr6hLNYvjsKKdJ4TK3wPJoVZS0RkR5XtFPaJ3iaGJu4kzFeiTT8VJtSLc1Zv+jJ1yhLcQJQ91YpDKAD9ILjlABbNTcA8NV8y3zX2dSuCoqBE5F3xXSpsqOpW2rpB3zrc52XybCmD9HAQGCkw4wx0k2HKbnsV/6UCe55qrEULASYNtJgy23fUGXA55rrgmKq94TcbLWCm/nDdXSULXQb12hDQOM6wd8qKQWa7BFi0vYd6N2sMfVGvR7325NBMNl+PBb9g3HyF83GOpknV+4K32uv8DaUUno+Hf9P2o++JQj3RiCPYeSpTkNxp9VZoQCNoDxGJF21jYH8/xu+7snhBxMzQgiqqowICaOKNPP9gKxe3Nv17Sr6zGhjOiSAol8hLcLCPcCUcAsARxizftghcwreZOMzeUEl5S/Mhixz8HML++TThhQn0/s/M7xlUw+zdbZnJbdwm51jZeZXSvYm2eupWK2WI1C9TUCNndqK5cvPgdFzhSTv6JaMoBg/z+v/ScTFEVOwFQKWAVNYZoSuPOsjxiAMB31DaUIa0191bemp5P/WeZCoS9pVn/fOew=
 git:
@@ -24,7 +31,7 @@ deploy:
   access_key_id: AKIA2Y645FQNOPI2R6XI
   secret_access_key:
     secure: m3IDZdPsNwMBYQ13QALNb1DKB8bHjWNnM44lVZ/OA0xzzEFRFnWaNcNcYWiHQGcbhVU5BJU8cmO7n5sFWv/Ne6P0vXXn29AuEj23e6fZnvHKfkAmwr2QqVGIQTHLb5z4FHdpbiPqbjaBDWS/UP1T8ILDrLXCZtjc5wINVgFH+vNPgJkcfCfq3LSVcM9m8wqirkUmb16qMFb/jKnBJdN/D6CzuSniT6nTOUZG2dI+wgzt7qvQpD8+aKzb04y/FzwY+j14ad5MTz2DAIs/lkqMIqpGkfmTlIgAxfcdT+FPCdN06WPVf8J19wCi/grDC6aFE7CeGLhBsLcx1knoyRudLeHTB3quTcBGRwG4T1g52qPG3zuDThmk/rdIbVWYh4EqbX+6zXT/J9NKfskCiSNf4uVcnhizafouEsGLGL7DW5yKQw5ZDRPH6SO3hDzXeADn0Da1EASBYhPpU/c4WS0o9PZmlzvDfGPoxxHapybtp/lh5nOlTqiaLv8srYQ3szJSLGZV+gv1LgGlvWGMMVnT5XA5fe0iURWKG014I16i+AkCuyr9+9gDzFUw4MWRD7T1z3lupeOs+mDYBTsarIYEoi7bLVcRyRPQCobQByg6rJR6syvNm5xfdpvFbcw8xdasPu1wzV0M6JvqunKISFL3xVakE+/Po5Vkgjcl/Z0jCeU=
-  bucket: minions-jamtartley-com
+  bucket: $AWS_BUCKET_NAME
   local-dir: dist
   acl: public_read
   region: eu-west-2
@@ -32,3 +39,6 @@ deploy:
   on:
     repo: jamtartley/minions_js
     branch: master
+env:
+  global:
+    secure: bH7Dh4Ovqdw3c+J9XsB+42LmTQTQMJkRMY397lkJ4Go49ytq2+10laBpaC0YrQuj24iUn84YCCiPQHT/CxRhzRHUAEYV57WE5oL4El5uXqH4BVa2Vo/jtyw0uh901H5OWU3UEyTgehhCOyXPIwRYTSLcpENR8nkkC2Qf8PBnuIlxSymQBbNtBPv6Gm4IWFJ6+YBNVUze0uh2662YQ6a/REjFMRLTFDtdkkIF632Qbduog6aYS17iIVIPRrD+A3cB0lTutdU+SakAzSyDQb2/ygexnjS5xNvxQGS0TFFpBVbsrhFKgG59Ttx9KBSD4sW6tN6H6floUpnXUj6V7lNgaKcjxJvuX2UEhH83uiG6kPA7Trf2Dm7JBBLkyWapo8a0FtjFbZwc5w40IH5/8MCP2fCdrlJYmrNIrk0C/DUK2NYm+ZmS0Zh/R71tyG8DhQ1LsD0j9mMhxDKOt55X0CGYINV/rkn12KPpgCjb6ZzDdrUknAEzczOMDZ3TNr85f+FkTDt+JkPMBdZG9vKqMpMDl7+RHk4K9t7+HFjjaghSRvI4jVyZ96Tt509+yV5PIlMsf+HgKpP/WxE+XoYWYOkbPyx59Fuun5Wn2qU0H919Mah1f6+UnbErCvPdK5AXHitSmRZDUZOLySP2JvcG66RLPNAUhPISgmaS+h2S0gHbogs=
