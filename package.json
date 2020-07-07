@@ -28,6 +28,6 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "npm": "^6.11.2"
+    "npm": "^6.14.6"
   }
 }
